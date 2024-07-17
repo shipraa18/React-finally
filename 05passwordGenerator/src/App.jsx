@@ -1,11 +1,14 @@
-import { useState, useCallback,  } from 'react'
+import { useState, useCallback, useEffect, useRef  } from 'react'
 import './App.css'
 
 function App() {
   const [length, setLength] = useState(8)
   const [numberAllowed, setnumberAllowed] = useState(false);
   const [charAllowed, setcharAllowed] = useState(false);
-  const [Password, setPassword] = useState();
+  const [Password, setPassword] = useState("");
+
+  //useRef Hook
+  const passwordRef = useRef(null)
 
 
   const passwordGenerator= useCallback(()=>{
@@ -18,12 +21,23 @@ function App() {
     for(let i=0;i<=length;i++)
       {
         let char = Math.floor(Math.random()*str.length + 1);
-        pass=str.charAt(char)
+        pass+=str.charAt(char)
       }
 
       setPassword(pass);
 
   },[length, numberAllowed, charAllowed, setPassword])
+
+  const copyPasswordToClipboard = useCallback(()=>{
+    passwordRef.current?.select();
+    // passwordRef.current?.setSelectRange(0,99);
+    window.navigator.clipboard.writeText(Password);
+  },
+[Password])
+
+  useEffect(()=>{
+    passwordGenerator()
+  }, [length,numberAllowed,charAllowed,passwordGenerator])
 
   return (
     <>
@@ -36,9 +50,12 @@ function App() {
         className='outline-none w-full py-1 px-3' 
         placeholder='password'
         readOnly
+        ref={passwordRef}
         />
 
-        <button className='outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0'
+        <button
+         className='outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0'
+         onClick={copyPasswordToClipboard}
         >copy</button>
       </div>
 
@@ -63,7 +80,6 @@ function App() {
             setnumberAllowed((prev) => !prev);
           }}
            />
-
           <label htmlFor="alphabetsInput">Numbers</label>
         </div>
 
@@ -89,4 +105,8 @@ export default App
 
 //useCallback //Object.is comparision algorithm
 //useState
+
+// useCallback: used for optimization it calls the function inside it when the dependencies are changed and returns a memoized function
+// useEffect: runs the function inside it whenever the page renders first time or dependencies are changed
+// useRef: used to give reference of selected components in our page so that the functions can be performed on referenced values
 
